@@ -4,9 +4,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
+@EnableRedisHttpSession
 public class RedisConfig {
 	@Bean
 	public RedisTemplate<String, ItemDto> itemRedisTemplate(
@@ -20,7 +26,13 @@ public class RedisConfig {
 		// key 문자열 직렬화
 		template.setKeySerializer(RedisSerializer.string());
 		// val dto 직렬화
-		template.setValueSerializer(RedisSerializer.json());
+		template.setValueSerializer(new JacksonJsonRedisSerializer<>(ItemDto.class));
 		return template;
 	}
+
+	@Bean
+	public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
+		return RedisSerializer.java(); // json이라고 취급하고 세션을 저장하겠다는 뜻
+	}
+
 }
